@@ -251,6 +251,11 @@
         const [m2, setM2] = useState(6110);
         const verkoop = prijs * m2;
         const share = verkoop / 3;
+
+        const [naprijs, setNaprijs] = useState(18.0);
+        const nabetaling = naprijs * m2 - verkoop;
+        const nabetalingPerPartij = nabetaling / 3;
+
         const [schemaTab, setSchemaTab] = useState(1);
         const [parties, setParties] = useState([
           { down: 5000, rate: 3.5, term: 120 },
@@ -259,7 +264,7 @@
         ]);
 
         const updateAll = (field, val) =>
-          setParties(parties.map((p) => ({ ...p, [field]: val })));
+          setParties((p) => p.map((x) => ({ ...x, [field]: val })));
         const results = parties.map((p) =>
           calcAmortization(share, p.down, p.rate, p.term),
         );
@@ -346,7 +351,7 @@
                   gap: 12,
                 }}
               >
-                {PARTIES.map((p, i) => (
+                {PARTIES.map((p) => (
                   <Metric
                     key={p.key}
                     label={
@@ -359,6 +364,73 @@
                     value={fmt(share)}
                   />
                 ))}
+              </div>
+            </div>
+
+            {/* Nabetaling */}
+            <div style={card}>
+              <div style={{ fontWeight: 500, marginBottom: 4 }}>Nabetaling</div>
+              <div style={{ fontSize: 12, color: "#888", marginBottom: 12 }}>
+                Eenmalige betaling per partij na afloop van de looptijd (10
+                jaar), gebaseerd op een herziene prijs per m².
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                  gap: 12,
+                  alignItems: "end",
+                  marginBottom: 12,
+                }}
+              >
+                <Field label="Prijs per m² incl. nabetaling (€)">
+                  <NumInput
+                    value={naprijs}
+                    onChange={setNaprijs}
+                    step={0.5}
+                    min={0}
+                  />
+                </Field>
+                <div>
+                  <div style={{ fontSize: 11, color: "#888" }}>Aantal m²</div>
+                  <div style={{ fontSize: 22, fontWeight: 500, marginTop: 4 }}>
+                    {m2.toLocaleString("nl-NL")}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: "#888" }}>
+                    Totale nabetaling
+                  </div>
+                  <div style={{ fontSize: 22, fontWeight: 500, marginTop: 4 }}>
+                    {fmt(nabetaling)}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: "#888" }}>
+                    Nabetaling per partij (⅓)
+                  </div>
+                  <div style={{ fontSize: 22, fontWeight: 500, marginTop: 4 }}>
+                    {fmt(nabetalingPerPartij)}
+                  </div>
+                </div>
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: 12,
+                }}
+              >
+                <Metric
+                  label="Nabetaling per partij (⅓)"
+                  value={fmt(nabetalingPerPartij)}
+                  sub="te voldoen na 10 jaar"
+                />
+                <Metric
+                  label="Opbouw totale nabetaling"
+                  value={fmt(nabetaling)}
+                  sub={`(${m2.toLocaleString("nl-NL")} m² × €${naprijs.toFixed(2)}) − ${fmt(verkoop)} verkoopbedrag`}
+                />
               </div>
             </div>
 
@@ -377,8 +449,8 @@
               }}
             >
               Standaard rente: 3,5%/jaar — reëel tarief voor onderhandse
-              leningen NL 2026. Maandelijkse rente wordt berekend via
-              samengestelde interest: (1 + r)^(1/12) − 1.
+              leningen NL 2026. Maandelijkse rente berekend via samengestelde
+              interest: (1 + r)^(1/12) − 1.
             </div>
             <div style={card}>
               <div
